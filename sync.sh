@@ -9,8 +9,8 @@
 #   ./sync.sh                # 导出（默认读取 ../usstock-game/data/game.db）+ 提交 + 推送
 #   ./sync.sh --db /path/to/game.db
 #
-# 定时自动同步（crontab 示例，每 10 分钟一次）:
-#   */10 * * * * cd "/Users/slein/Project/dsh idea/usstock-web" && ./sync.sh >> /tmp/usstock-web-sync.log 2>&1
+# 定时自动同步（crontab 示例，每小时整点一次）:
+#   0 * * * * cd "/Users/slein/Project/dsh idea/usstock-web" && ./sync.sh >> /tmp/usstock-web-sync.log 2>&1
 # ============================================================================
 set -euo pipefail
 cd "$(dirname "$0")"

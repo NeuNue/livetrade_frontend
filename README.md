@@ -90,22 +90,22 @@ cd "/Users/slein/Project/dsh idea/usstock-web"
 
 ```
 游戏服务（开播中）──每 60s 导出──▶ public/data/*.json（本地始终最新）
-cron 定时任务 ──每 10 分钟──▶ ./sync.sh 提交+推送 GitHub ──▶ Vercel 自动重新部署
+cron 定时任务 ──每小时──▶ ./sync.sh 提交+推送 GitHub ──▶ Vercel 自动重新部署
 ```
 
 - **导出**：`usstock-game/main.py` 内置周期导出（默认每 60 秒，`WEB_EXPORT_INTERVAL` 可调），写本地 JSON
-- **推送**：已安装 crontab（每 10 分钟执行一次 `sync.sh`），有数据变化才提交，无变化自动跳过
+- **推送**：已安装 crontab（每小时整点执行一次 `sync.sh`），有数据变化才提交，无变化自动跳过
 
 管理命令：
 
 ```bash
 crontab -l                                    # 查看定时任务
-crontab -e                                    # 编辑（可改 */10 为 */5、*/15 等间隔）
+crontab -e                                    # 编辑（可改 0 * * * * 为 */30、*/10 等间隔）
 crontab -r                                    # 删除定时任务（回到手动模式）
 tail -f /tmp/usstock-web-sync.log             # 查看每次同步日志
 ```
 
-> ⚠️ **Vercel 免费版限制**：每天最多 100 次构建部署。10 分钟间隔 × 持续直播 8 小时 ≈ 48 次/天，安全；若直播更长或想更频繁，请把间隔调大（如 `*/15`、`*/20`）。
+> 💡 当前间隔为 **1 小时**（全天最多 24 次部署，远低于 Vercel 免费版每日 100 次构建上限）。直播中想更快上线最新战绩，可临时把间隔调小（如 `*/10`），或手动跑一次 `./sync.sh`。
 >
 > 备选：`docs/com.usstock.web-sync.plist` 是 LaunchAgent 模板（效果等同 cron）。注意它必须在你**自己的终端**里执行 `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.usstock.web-sync.plist` 才能加载（SSH/后台会话无法访问 GUI 域）。
 
