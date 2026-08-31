@@ -77,33 +77,37 @@ npm run export       # 手动重新导出数据（读取 ../usstock-game/data/ga
 
 数据更新时间 = 你最后一次把 `public/data/` 推上 GitHub 的时间。
 
-### 方式一：手动一键（推荐）
+### 方式一：手动一键
 
 ```bash
 cd "/Users/slein/Project/dsh idea/usstock-web"
 ./sync.sh        # 导出 → 提交 → 推送 → Vercel 自动部署
 ```
 
-### 方式二：开播时游戏服务自动导出
+### 方式二：全自动（已在本机配好 ✅）
 
-`usstock-game/main.py` 已内置周期导出任务（默认每 60 秒一次，写入 `usstock-web/public/data`）：
+链路分两段，各司其职：
 
-```bash
-WEB_EXPORT_INTERVAL=60 python3 main.py    # 环境变量可调间隔
+```
+游戏服务（开播中）──每 60s 导出──▶ public/data/*.json（本地始终最新）
+cron 定时任务 ──每 10 分钟──▶ ./sync.sh 提交+推送 GitHub ──▶ Vercel 自动重新部署
 ```
 
-自动导出后仍需推送才会上线 —— 配合方式三的定时任务即可全自动。
+- **导出**：`usstock-game/main.py` 内置周期导出（默认每 60 秒，`WEB_EXPORT_INTERVAL` 可调），写本地 JSON
+- **推送**：已安装 crontab（每 10 分钟执行一次 `sync.sh`），有数据变化才提交，无变化自动跳过
 
-### 方式三：定时自动同步（crontab）
+管理命令：
 
 ```bash
-crontab -e
-# 每 10 分钟：导出 + 推送（GitHub 需已配置免密 SSH key 或凭证）
-*/10 * * * * cd "/Users/slein/Project/dsh idea/usstock-web" && ./sync.sh >> /tmp/usstock-web-sync.log 2>&1
+crontab -l                                    # 查看定时任务
+crontab -e                                    # 编辑（可改 */10 为 */5、*/15 等间隔）
+crontab -r                                    # 删除定时任务（回到手动模式）
+tail -f /tmp/usstock-web-sync.log             # 查看每次同步日志
 ```
 
-> macOS 也可用 LaunchAgent 替代 crontab（更推荐）：在 `~/Library/LaunchAgents` 建 plist，
-> 每 600 秒执行一次 `sync.sh`。需要示例可参照下方模板或直接询问。
+> ⚠️ **Vercel 免费版限制**：每天最多 100 次构建部署。10 分钟间隔 × 持续直播 8 小时 ≈ 48 次/天，安全；若直播更长或想更频繁，请把间隔调大（如 `*/15`、`*/20`）。
+>
+> 备选：`docs/com.usstock.web-sync.plist` 是 LaunchAgent 模板（效果等同 cron）。注意它必须在你**自己的终端**里执行 `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.usstock.web-sync.plist` 才能加载（SSH/后台会话无法访问 GUI 域）。
 
 ---
 
