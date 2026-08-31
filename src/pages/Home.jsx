@@ -4,35 +4,31 @@ import { loadHome } from '../api.js'
 import { fmtDate, fmtInt, fmtMoney, fmtQty, timeAgo } from '../format.js'
 import { explainReason } from '../labels.js'
 import Avatar from '../components/Avatar.jsx'
-import Mascot from '../components/Mascot.jsx'
 import TypeBadge from '../components/TypeBadge.jsx'
 import { Empty, Loading } from '../components/State.jsx'
 
 const REFRESH_MS = 60_000 // 与 vercel.json 的 data 缓存策略一致
 const FEED_PAGE = 40
 
-function StatChip({ label, value, accent = false }) {
+function StatChip({ label, value }) {
   return (
-    <div className={`stat-chip ${accent ? 'stat-chip-accent' : ''}`}>
+    <div className="stat-chip">
       <span className="stat-label">{label}</span>
       <span className="stat-value">{value}</span>
     </div>
   )
 }
 
-function SectionTitle({ id, emoji, title, sub }) {
+function SectionTitle({ id, title, sub }) {
   return (
     <div className="section-title" id={id}>
-      <h2>
-        <span className="section-emoji">{emoji}</span>
-        {title}
-      </h2>
+      <h2>{title}</h2>
       {sub ? <p className="section-sub">{sub}</p> : null}
     </div>
   )
 }
 
-/* 前三名领奖台 */
+/* 前三名 */
 function Podium({ top }) {
   const order = [top[1], top[0], top[2]].filter(Boolean)
   return (
@@ -43,27 +39,27 @@ function Podium({ top }) {
           to={`/player/${u.open_id}`}
           className={`podium-card podium-rank-${u.rank}`}
         >
-          <span className="podium-medal">{u.rank === 1 ? '👑' : u.rank === 2 ? '🥈' : '🥉'}</span>
-          <Avatar src={u.face} nickname={u.nickname} size={u.rank === 1 ? 84 : 64} />
+          <span className="podium-no">No.{u.rank}</span>
+          <Avatar src={u.face} nickname={u.nickname} size={u.rank === 1 ? 56 : 48} />
           <span className="podium-name" title={u.nickname}>
             {u.nickname}
           </span>
           <span className="podium-total">{fmtMoney(u.total)}</span>
-          <span className="podium-trades">交易 {u.trade_count} 次 · 持仓 {u.position_count}</span>
+          <span className="podium-meta">持仓 {u.position_count} · 交易 {u.trade_count} 次</span>
         </Link>
       ))}
     </div>
   )
 }
 
-/* 排行榜表格行 */
+/* 排行榜行 */
 function RankRow({ u, maxTotal }) {
   const pct = maxTotal > 0 ? (u.total / maxTotal) * 100 : 0
   return (
     <Link to={`/player/${u.open_id}`} className="rank-row">
       <span className={`rank-no rank-no-${Math.min(u.rank, 4)}`}>{u.rank}</span>
       <span className="rank-player">
-        <Avatar src={u.face} nickname={u.nickname} size={40} />
+        <Avatar src={u.face} nickname={u.nickname} size={32} />
         <span className="rank-name-wrap">
           <span className="rank-name">{u.nickname}</span>
           <span className="rank-id">{u.open_id.slice(0, 8)}</span>
@@ -74,7 +70,7 @@ function RankRow({ u, maxTotal }) {
       <span className="rank-total">
         <span className="rank-total-num">{fmtMoney(u.total)}</span>
         <span className="rank-bar">
-          <span className="rank-bar-fill" style={{ width: `${Math.max(4, pct)}%` }} />
+          <span className="rank-bar-fill" style={{ width: `${Math.max(3, pct)}%` }} />
         </span>
       </span>
       <span className="rank-stat rank-time">{timeAgo(u.last_active_at)}</span>
@@ -88,7 +84,7 @@ function FeedItem({ f }) {
   if (f.type === 'recharge') {
     text = (
       <>
-        送出了 <b>{f.gift_name}</b> ×{f.gift_count} · 虚拟币
+        送出 <b>{f.gift_name}</b> ×{f.gift_count} · 虚拟币
         <b className="up"> +{fmtInt(f.coins_added)}</b>
       </>
     )
@@ -117,7 +113,7 @@ function FeedItem({ f }) {
   return (
     <li className="feed-item">
       <span className="feed-avatar">
-        <Avatar src={f.face} nickname={f.nickname} size={40} />
+        <Avatar src={f.face} nickname={f.nickname} size={36} />
       </span>
       <span className="feed-body">
         <span className="feed-head">
@@ -157,7 +153,7 @@ export default function Home() {
     return () => clearInterval(t)
   }, [])
 
-  // 从导航状态滚动到指定区块（排行榜/动态）
+  // 从导航状态滚动到指定区块
   useEffect(() => {
     if (scrollTarget && !didScroll.current && !state.loading) {
       didScroll.current = true
@@ -170,52 +166,36 @@ export default function Home() {
 
   const { meta, leaderboard, feed, loading, error } = state
   const top = leaderboard.slice(0, 3)
-  const rest = leaderboard.slice(3)
-  const maxTotal = useMemo(
-    () => Math.max(...leaderboard.map((u) => u.total), 1),
-    [leaderboard],
-  )
+  const maxTotal = useMemo(() => Math.max(...leaderboard.map((u) => u.total), 1), [leaderboard])
   const visibleFeed = feed.slice(0, feedCount)
-  const updatedAt = meta ? fmtDate(meta.exported_at) : null
   const stats = meta?.stats || {}
 
-  if (loading) return <Loading text="正在翻开花名册…" />
+  if (loading) return <Loading text="加载中…" />
   if (error) {
-    return (
-      <Empty emoji="😿" title="数据加载失败" desc={`${error} — 请确认已运行 usstock-game 的导出脚本`} />
-    )
+    return <Empty emoji="😿" title="数据加载失败" desc={`${error} — 请先运行 usstock-game 的导出脚本`} />
   }
 
   return (
     <div className="home">
       {/* Hero */}
       <section className="hero">
-        <div className="hero-copy">
-          <p className="hero-kicker">🌸 B站直播互动 · 虚拟美股交易</p>
-          <h1 className="hero-title">
-            納指自習室
-            <span className="hero-title-dot">.</span>
-          </h1>
-          <p className="hero-sub">弹幕下单 · 实时撮合 · 全流水记账 —— 这里是大家的虚拟盘研究所</p>
-          <div className="hero-stats">
-            <StatChip label="玩家" value={fmtInt(stats.users)} />
-            <StatChip label="累计成交" value={`${fmtInt(stats.trades)} 笔`} />
-            <StatChip label="礼物入账" value={`${fmtInt(stats.recharges)} 次`} />
-            <StatChip label="行情标的" value={`${fmtInt(stats.symbols_with_price)} 只`} accent />
-          </div>
+        <div>
+          <h1 className="hero-title">納指自習室 · 虚拟盘</h1>
+          <p className="hero-sub">B站直播弹幕交易 · 排行榜与战绩一览</p>
         </div>
-        <div className="hero-mascot">
-          <Mascot size={170} className="bounce-soft" />
-          <span className="hero-mascot-note">今天也要元气满满地交易哦！</span>
+        <div className="hero-stats">
+          <StatChip label="玩家" value={fmtInt(stats.users)} />
+          <StatChip label="累计成交" value={`${fmtInt(stats.trades)} 笔`} />
+          <StatChip label="礼物入账" value={`${fmtInt(stats.recharges)} 次`} />
+          <StatChip label="行情标的" value={`${fmtInt(stats.symbols_with_price)} 只`} />
         </div>
       </section>
 
       {/* 排行榜 */}
       <section className="section card" id="rank">
         <SectionTitle
-          emoji="🏆"
-          title="资产排行榜"
-          sub={`现金 + 持仓市值（按最新行情），共 ${fmtInt(leaderboard.length)} 位玩家 · 点击玩家进入个人页`}
+          title="排行榜"
+          sub={`现金 + 持仓市值，共 ${fmtInt(leaderboard.length)} 位玩家 · 点击进入个人页`}
         />
         {top.length > 0 ? <Podium top={top} /> : null}
         <div className="rank-table">
@@ -237,9 +217,8 @@ export default function Home() {
       {/* 操作动态 */}
       <section className="section card" id="feed">
         <SectionTitle
-          emoji="💬"
-          title="近期操作动态"
-          sub={`全场合计 ${fmtInt(feed.length)} 条（成交 / 拒绝 / 礼物入账），每 60 秒自动刷新`}
+          title="近期操作"
+          sub={`${fmtInt(feed.length)} 条动态（成交 / 拒绝 / 礼物）· 每 60 秒自动刷新`}
         />
         {feed.length === 0 ? (
           <Empty emoji="🌸" title="暂无动态" desc="直播间弹幕指令会实时出现在这里" />
@@ -253,7 +232,7 @@ export default function Home() {
         {feedCount < feed.length ? (
           <div className="more-wrap">
             <button type="button" className="btn-ghost" onClick={() => setFeedCount((c) => c + FEED_PAGE)}>
-              查看更多动态 ↓
+              查看更多
             </button>
           </div>
         ) : null}

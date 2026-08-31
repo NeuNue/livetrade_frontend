@@ -1,12 +1,11 @@
-/** 操作类型徽章：买入 / 卖出 / 礼物 / 失败 */
+/** 操作类型徽章（简约文本样式） */
 export default function TypeBadge({ type, status = 'filled', compact = false }) {
-  if (status === 'rejected') {
-    return <span className={`badge badge-rejected ${compact ? 'badge-compact' : ''}`}>✕ 失败</span>
-  }
-  if (type === 'buy') return <span className={`badge badge-buy ${compact ? 'badge-compact' : ''}`}>📈 买入</span>
-  if (type === 'sell') return <span className={`badge badge-sell ${compact ? 'badge-compact' : ''}`}>📉 卖出</span>
-  if (type === 'recharge') return <span className={`badge badge-recharge ${compact ? 'badge-compact' : ''}`}>🎁 礼物</span>
-  return <span className={`badge badge-query ${compact ? 'badge-compact' : ''}`}>💬 查询</span>
+  const cls = `badge badge-${status === 'rejected' ? 'rejected' : type}${compact ? ' badge-compact' : ''}`
+  if (status === 'rejected') return <span className={cls}>失败</span>
+  if (type === 'buy') return <span className={cls}>买入</span>
+  if (type === 'sell') return <span className={cls}>卖出</span>
+  if (type === 'recharge') return <span className={cls}>礼物</span>
+  return <span className={cls}>查询</span>
 }
 
 /** 数字着色：盈利红 / 亏损绿（A股习惯） */

@@ -35,15 +35,9 @@ export default function Player() {
     }
   }, [openId])
 
-  if (state.loading) return <Loading text="正在翻阅这位玩家的交易簿…" />
+  if (state.loading) return <Loading text="加载中…" />
   if (state.notFound || !state.data) {
-    return (
-      <Empty
-        emoji="😿"
-        title="找不到这位玩家"
-        desc="ta 可能还没来过自习室，或已经退场了"
-      />
-    )
+    return <Empty emoji="😿" title="找不到这位玩家" desc="ta 可能还没来过自习室，或已经退场了" />
   }
 
   const { user, rank, total, cash, positions_value, unrealized_pnl, unrealized_pnl_pct, stats, positions, trades, recharges } =
@@ -54,17 +48,17 @@ export default function Player() {
   return (
     <div className="player-page">
       <Link to="/" className="back-link">
-        ← 返回排行榜
+        ← 返回
       </Link>
 
       {/* 档案卡 */}
       <section className="card profile-card">
         <div className="profile-main">
-          <Avatar src={user.face} nickname={user.nickname} size={88} />
+          <Avatar src={user.face} nickname={user.nickname} size={64} />
           <div className="profile-info">
             <div className="profile-name-row">
               <h1 className="profile-name">{user.nickname}</h1>
-              {user.is_member ? <span className="member-badge">⭐ 舰长</span> : null}
+              {user.is_member ? <span className="member-badge">舰长</span> : null}
               {rank ? <span className="rank-badge">第 {rank} 名</span> : <span className="rank-badge rank-badge-off">未上榜</span>}
             </div>
             <p className="profile-id">
@@ -78,28 +72,20 @@ export default function Player() {
         <div className="profile-stats">
           <Stat label="可用现金" value={fmtMoney(cash)} />
           <Stat label="持仓市值" value={fmtMoney(positions_value)} />
-          <Stat
-            label="浮动盈亏"
-            value={fmtSigned(unrealized_pnl)}
-            cls={`num-${pnlClass(unrealized_pnl)}`}
-          />
-          <Stat
-            label="盈亏率"
-            value={fmtPct(unrealized_pnl_pct)}
-            cls={`num-${pnlClass(unrealized_pnl_pct)}`}
-          />
+          <Stat label="浮动盈亏" value={fmtSigned(unrealized_pnl)} cls={`num-${pnlClass(unrealized_pnl)}`} />
+          <Stat label="盈亏率" value={fmtPct(unrealized_pnl_pct)} cls={`num-${pnlClass(unrealized_pnl_pct)}`} />
           <Stat label="累计交易" value={`${fmtInt(stats.trade_count)} 次`} />
           <Stat label="累计手续费" value={fmtMoney(stats.total_fees)} />
-          <Stat label="礼物入账" value={`${fmtInt(stats.recharge_count)} 次 · +${fmtInt(stats.recharge_coins)}`} />
+          <Stat label="礼物入账" value={`${fmtInt(stats.recharge_count)} 次`} />
           <Stat label="持仓标的" value={`${positions.length} 只`} />
         </div>
       </section>
 
       {/* 当前持仓 */}
       <section className="section card">
-        <h2 className="section-h2">📦 当前持仓</h2>
+        <h2 className="section-h2">当前持仓</h2>
         {positions.length === 0 ? (
-          <Empty emoji="🍃" title="空仓中" desc="这位玩家还没有持仓，快去发弹幕下单吧！" />
+          <Empty emoji="🍃" title="空仓中" desc="这位玩家还没有持仓" />
         ) : (
           <div className="table-wrap">
             <table className="data-table">
@@ -139,7 +125,7 @@ export default function Player() {
 
       {/* 历史操作 */}
       <section className="section card">
-        <h2 className="section-h2">🗂️ 历史操作</h2>
+        <h2 className="section-h2">历史操作</h2>
         {trades.length === 0 ? (
           <Empty emoji="📭" title="暂无交易记录" desc="买入 / 卖出指令都会记录在这里" />
         ) : (
@@ -178,7 +164,7 @@ export default function Player() {
                             {explainReason(t.reason)}
                           </span>
                         ) : (
-                          <span className="ok-text">✓ 成交</span>
+                          <span className="ok-text">成交</span>
                         )}
                       </td>
                     </tr>
@@ -189,7 +175,7 @@ export default function Player() {
             {hasMoreTrades ? (
               <div className="more-wrap">
                 <button type="button" className="btn-ghost" onClick={() => setTradeCount((c) => c + TRADE_PAGE)}>
-                  加载更多（{trades.length - tradeCount} 条剩余）↓
+                  加载更多（剩余 {trades.length - tradeCount} 条）
                 </button>
               </div>
             ) : null}
@@ -200,12 +186,12 @@ export default function Player() {
       {/* 礼物充值 */}
       {recharges.length > 0 ? (
         <section className="section card">
-          <h2 className="section-h2">🎁 礼物入账</h2>
+          <h2 className="section-h2">礼物入账</h2>
           <ul className="recharge-list">
             {recharges.map((r, i) => (
               <li key={i} className="recharge-item">
                 <span className="recharge-gift">
-                  🎁 {r.gift_name} ×{r.gift_count}
+                  {r.gift_name} ×{r.gift_count}
                 </span>
                 <span className="recharge-coins up">虚拟币 +{fmtInt(r.coins_added)}</span>
                 <time className="recharge-time" title={fmtDate(r.ts)}>
