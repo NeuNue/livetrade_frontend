@@ -1,0 +1,22 @@
+{
+  "name": "usstock-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "纳指自习室 · B站直播虚拟美股交易 — 排行榜 / 操作动态 / 个人战绩（Vercel 静态托管）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "export": "python3 ../usstock-game/export_web.py"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}

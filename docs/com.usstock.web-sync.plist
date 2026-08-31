@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  纳指自习室 Web 数据自动同步 LaunchAgent（macOS）
+  用法：
+    1. 把本文件复制到 ~/Library/LaunchAgents/
+       cp docs/com.usstock.web-sync.plist ~/Library/LaunchAgents/
+    2. 加载：launchctl load ~/Library/LaunchAgents/com.usstock.web-sync.plist
+       （或新系统：launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.usstock.web-sync.plist）
+    3. 卸载：launchctl unload ~/Library/LaunchAgents/com.usstock.web-sync.plist
+
+  说明：每 600 秒（10 分钟）执行一次 sync.sh（导出 JSON → git 提交 → 推送 → Vercel 自动部署）。
+  要求：usstock-web 已是 git 仓库并关联了 GitHub 远端（见 README「部署到 Vercel」）。
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.usstock.web-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string>/Users/slein/Project/dsh idea/usstock-web/sync.sh</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>600</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/usstock-web-sync.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/usstock-web-sync.err.log</string>
+</dict>
+</plist>
