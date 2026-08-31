@@ -15,8 +15,20 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# 解析 python3 / git（launchd / crontab 的 PATH 很精简，可能找不到 anaconda/homebrew）
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON3="$(command -v python3)"
+elif [ -x /opt/anaconda3/bin/python3 ]; then
+  PYTHON3=/opt/anaconda3/bin/python3
+elif [ -x /usr/bin/python3 ]; then
+  PYTHON3=/usr/bin/python3
+else
+  echo "❌ 找不到 python3，请修改 sync.sh 顶部 PYTHON3 路径" >&2
+  exit 1
+fi
+
 echo "==> [1/3] 导出数据快照…"
-python3 ../usstock-game/export_web.py "$@"
+"$PYTHON3" ../usstock-game/export_web.py "$@"
 
 echo "==> [2/3] 提交变更…"
 git add -A
