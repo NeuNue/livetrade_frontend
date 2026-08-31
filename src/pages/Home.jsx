@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { loadHome } from '../api.js'
 import { fmtDate, fmtInt, fmtMoney, fmtQty, timeAgo } from '../format.js'
@@ -9,6 +9,7 @@ import { Empty, Loading } from '../components/State.jsx'
 
 const REFRESH_MS = 60_000 // 与 vercel.json 的 data 缓存策略一致
 const FEED_PAGE = 40
+const RANK_PAGE_SIZE = 10 // 排行榜每页条数
 
 function StatChip({ label, value }) {
   return (
@@ -53,8 +54,7 @@ function Podium({ top }) {
 }
 
 /* 排行榜行 */
-function RankRow({ u, maxTotal }) {
-  const pct = maxTotal > 0 ? (u.total / maxTotal) * 100 : 0
+function RankRow({ u }) {
   return (
     <Link to={`/player/${u.open_id}`} className="rank-row">
       <span className={`rank-no rank-no-${Math.min(u.rank, 4)}`}>{u.rank}</span>
@@ -69,12 +69,45 @@ function RankRow({ u, maxTotal }) {
       <span className="rank-stat rank-hide-md">{u.trade_count} 次</span>
       <span className="rank-total">
         <span className="rank-total-num">{fmtMoney(u.total)}</span>
-        <span className="rank-bar">
-          <span className="rank-bar-fill" style={{ width: `${Math.max(3, pct)}%` }} />
-        </span>
       </span>
       <span className="rank-stat rank-time">{timeAgo(u.last_active_at)}</span>
     </Link>
+  )
+}
+
+/* 分页控件 */
+function Pagination({ page, maxPage, onChange }) {
+  if (maxPage <= 1) return null
+  const pages = Array.from({ length: maxPage }, (_, i) => i + 1)
+  return (
+    <div className="pagination">
+      <button
+        type="button"
+        className="page-btn"
+        disabled={page === 1}
+        onClick={() => onChange(page - 1)}
+      >
+        ‹ 上一页
+      </button>
+      {pages.map((n) => (
+        <button
+          key={n}
+          type="button"
+          className={`page-btn ${n === page ? 'page-btn-active' : ''}`}
+          onClick={() => onChange(n)}
+        >
+          {n}
+        </button>
+      ))}
+      <button
+        type="button"
+        className="page-btn"
+        disabled={page === maxPage}
+        onClick={() => onChange(page + 1)}
+      >
+        下一页 ›
+      </button>
+    </div>
   )
 }
 
@@ -134,6 +167,7 @@ function FeedItem({ f }) {
 export default function Home() {
   const [state, setState] = useState({ loading: true, error: null, meta: null, leaderboard: [], feed: [] })
   const [feedCount, setFeedCount] = useState(FEED_PAGE)
+  const [rankPage, setRankPage] = useState(1)
   const location = useLocation()
   const scrollTarget = location.state?.scrollTo
   const didScroll = useRef(false)
@@ -166,7 +200,9 @@ export default function Home() {
 
   const { meta, leaderboard, feed, loading, error } = state
   const top = leaderboard.slice(0, 3)
-  const maxTotal = useMemo(() => Math.max(...leaderboard.map((u) => u.total), 1), [leaderboard])
+  const maxRankPage = Math.max(1, Math.ceil(leaderboard.length / RANK_PAGE_SIZE))
+  const curRankPage = Math.min(rankPage, maxRankPage)
+  const pageRows = leaderboard.slice((curRankPage - 1) * RANK_PAGE_SIZE, curRankPage * RANK_PAGE_SIZE)
   const visibleFeed = feed.slice(0, feedCount)
   const stats = meta?.stats || {}
 
@@ -195,7 +231,7 @@ export default function Home() {
       <section className="section card" id="rank">
         <SectionTitle
           title="排行榜"
-          sub={`现金 + 持仓市值，共 ${fmtInt(leaderboard.length)} 位玩家 · 点击进入个人页`}
+          sub={`现金 + 持仓市值，共 ${fmtInt(leaderboard.length)} 位玩家 · 每页 ${RANK_PAGE_SIZE} 名 · 点击进入个人页`}
         />
         {top.length > 0 ? <Podium top={top} /> : null}
         <div className="rank-table">
@@ -207,11 +243,12 @@ export default function Home() {
             <span>总资产</span>
             <span className="rank-time">最近活跃</span>
           </div>
-          {leaderboard.map((u) => (
-            <RankRow key={u.open_id} u={u} maxTotal={maxTotal} />
+          {pageRows.map((u) => (
+            <RankRow key={u.open_id} u={u} />
           ))}
           {leaderboard.length === 0 ? <Empty emoji="🍵" title="还没有玩家" desc="开播后观众发 !buy 即可上榜" /> : null}
         </div>
+        <Pagination page={curRankPage} maxPage={maxRankPage} onChange={setRankPage} />
       </section>
 
       {/* 操作动态 */}
