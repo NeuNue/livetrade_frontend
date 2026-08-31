@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-/** 顶部导航：简约 —— 品牌 + 锚点导航 + 数据更新时间 */
-export default function Header({ updatedAt }) {
+/** 顶部导航：简约 —— 品牌 + 锚点导航 + 主题切换 + 数据更新时间 */
+export default function Header({ updatedAt, theme = 'light', onToggleTheme }) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -31,6 +31,15 @@ export default function Header({ updatedAt }) {
             操作动态
           </button>
         </nav>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={onToggleTheme}
+          aria-label={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}
+          title={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         {updatedAt ? (
           <span className="updated-badge" title={`数据更新时间：${updatedAt}`}>
             <span className="live-dot" />

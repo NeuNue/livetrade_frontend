@@ -76,7 +76,7 @@ export default function Player() {
           <Stat label="盈亏率" value={fmtPct(unrealized_pnl_pct)} cls={`num-${pnlClass(unrealized_pnl_pct)}`} />
           <Stat label="累计交易" value={`${fmtInt(stats.trade_count)} 次`} />
           <Stat label="累计手续费" value={fmtMoney(stats.total_fees)} />
-          <Stat label="礼物入账" value={`${fmtInt(stats.recharge_count)} 次`} />
+          {stats.recharge_count > 0 ? <Stat label="礼物入账" value={`${fmtInt(stats.recharge_count)} 次`} /> : null}
           <Stat label="持仓标的" value={`${positions.length} 只`} />
         </div>
       </section>

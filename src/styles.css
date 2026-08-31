@@ -1,24 +1,69 @@
 /* ==========================================================================
-   納指自習室 · 虚拟盘 — 简约风格
-   白底 / 细边框 / 单一樱花粉点缀 / 克制的排版
+   納指自習室 · 虚拟盘 — 简约风格（支持亮 / 暗双主题）
+   白底（或深灰底）卡片 + 单一樱花粉点缀 · 涨绿跌红
+   主题通过 <html data-theme="light|dark"> 切换，变量见下方两段
    ========================================================================== */
 
 :root {
+  color-scheme: light;
+
   --accent: #e8648c;          /* 樱花粉（唯一强调色） */
   --accent-weak: #fdf3f7;
   --accent-border: #f3d4e0;
   --bg: #f6f7f9;
   --surface: #ffffff;
+  --surface-2: #fafbfc;       /* 表头 / 次级底色 */
+  --hover: #f4f5f7;
   --border: #e7e9ee;
   --border-strong: #d8dbe2;
   --text: #1f2328;
   --text-2: #57606a;
   --text-3: #8b949e;
-  --up: #d64545;              /* 涨（A股习惯：红） */
-  --down: #1f9d68;            /* 跌（绿） */
-  --radius: 12px;
+  --up: #1f9d68;              /* 涨（绿） */
+  --up-bg: #eef8f3;
+  --down: #d64545;            /* 跌（红） */
+  --down-bg: #fdf0f2;
+  --gold-bg: #fdf6e8;
+  --gold-border: #f3e3bd;
+  --gold-text: #b7791f;
+  --chip-bg: #f2f3f5;         /* 标的码 / 灰底徽章 */
+  --query-bg: #eef1f7;
+  --query-text: #55618f;
+  --scrollbar: #d6d9e0;
+  --header-bg: rgba(255, 255, 255, 0.92);
   --shadow: 0 1px 3px rgba(27, 31, 36, 0.06);
+  --radius: 12px;
   --font: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --accent: #f48aa8;
+  --accent-weak: #2c1f26;
+  --accent-border: #56313f;
+  --bg: #14161b;
+  --surface: #1b1e25;
+  --surface-2: #21242c;
+  --hover: #22252d;
+  --border: #2b2f38;
+  --border-strong: #3c4150;
+  --text: #e8eaee;
+  --text-2: #aab1bc;
+  --text-3: #79818e;
+  --up: #3ecf8f;
+  --up-bg: #122a20;
+  --down: #f26d6d;
+  --down-bg: #2e191c;
+  --gold-bg: #2a2311;
+  --gold-border: #4d3f1b;
+  --gold-text: #e2bc5d;
+  --chip-bg: #262a33;
+  --query-bg: #232735;
+  --query-text: #9aa5d8;
+  --scrollbar: #3c4150;
+  --header-bg: rgba(20, 22, 27, 0.9);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -38,6 +83,7 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.2s, color 0.2s;
 }
 
 a {
@@ -71,7 +117,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
@@ -84,7 +130,7 @@ button {
   height: 56px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 }
 
 .brand {
@@ -137,6 +183,24 @@ button {
   color: var(--accent);
 }
 
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1;
+  transition: border-color 0.15s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+}
+
 .updated-badge {
   display: inline-flex;
   align-items: center;
@@ -150,7 +214,7 @@ button {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #34c98f;
+  background: var(--up);
 }
 
 /* --------------------------------------------------------------------------
@@ -162,6 +226,7 @@ button {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 22px;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .section {
@@ -242,13 +307,13 @@ button {
   padding: 1px 8px;
 }
 
-.badge-buy { background: #fdf0f2; color: var(--up); }
-.badge-sell { background: #eef8f3; color: var(--down); }
-.badge-recharge { background: #fdf6e8; color: #b7791f; }
-.badge-query { background: #eef1f7; color: #55618f; }
-.badge-rejected { background: #f2f3f5; color: var(--text-3); }
+.badge-buy { background: var(--up-bg); color: var(--up); }
+.badge-sell { background: var(--down-bg); color: var(--down); }
+.badge-recharge { background: var(--gold-bg); color: var(--gold-text); }
+.badge-query { background: var(--query-bg); color: var(--query-text); }
+.badge-rejected { background: var(--chip-bg); color: var(--text-3); }
 
-/* 涨跌色 */
+/* 涨跌色：涨绿 / 跌红 */
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--text-3); }
@@ -463,7 +528,7 @@ button {
 }
 
 .rank-row:not(.rank-head):hover {
-  background: #fafbfc;
+  background: var(--hover);
 }
 
 .rank-head {
@@ -482,9 +547,11 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.rank-no-1 { color: var(--accent); }
-.rank-no-2 { color: var(--accent); }
-.rank-no-3 { color: var(--accent); }
+.rank-no-1,
+.rank-no-2,
+.rank-no-3 {
+  color: var(--accent);
+}
 
 .rank-player {
   display: flex;
@@ -533,7 +600,7 @@ button {
 
 .rank-bar {
   height: 4px;
-  background: #f0f1f4;
+  background: var(--border);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -680,8 +747,8 @@ button {
 }
 
 .rank-badge {
-  background: #eef1f7;
-  color: #55618f;
+  background: var(--query-bg);
+  color: var(--query-text);
   font-size: 11px;
   font-weight: 600;
   padding: 2px 9px;
@@ -689,7 +756,7 @@ button {
 }
 
 .rank-badge-off {
-  background: #f2f3f5;
+  background: var(--chip-bg);
   color: var(--text-3);
 }
 
@@ -760,7 +827,7 @@ button {
   font-weight: 500;
   color: var(--text-3);
   padding: 8px 12px;
-  background: #fafbfc;
+  background: var(--surface-2);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -773,7 +840,7 @@ button {
 }
 
 .data-table tbody tr:hover {
-  background: #fafbfc;
+  background: var(--hover);
 }
 
 .row-rejected {
@@ -782,7 +849,7 @@ button {
 
 .symbol-chip {
   display: inline-block;
-  background: #f2f3f5;
+  background: var(--chip-bg);
   color: var(--text-2);
   font-weight: 600;
   font-size: 12px;
@@ -801,7 +868,7 @@ button {
 }
 
 .ok-text {
-  color: var(--down);
+  color: var(--up);
   font-weight: 600;
   font-size: 12px;
 }
@@ -827,8 +894,8 @@ button {
   align-items: center;
   gap: 12px;
   padding: 9px 14px;
-  background: #fdf6e8;
-  border: 1px solid #f3e3bd;
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
   border-radius: 10px;
   font-size: 13px;
 }
@@ -910,7 +977,7 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d6d9e0;
+  background: var(--scrollbar);
   border-radius: 999px;
   border: 2px solid var(--bg);
 }

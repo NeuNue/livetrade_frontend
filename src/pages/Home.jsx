@@ -186,7 +186,7 @@ export default function Home() {
         <div className="hero-stats">
           <StatChip label="玩家" value={fmtInt(stats.users)} />
           <StatChip label="累计成交" value={`${fmtInt(stats.trades)} 笔`} />
-          <StatChip label="礼物入账" value={`${fmtInt(stats.recharges)} 次`} />
+          {stats.recharges > 0 ? <StatChip label="礼物入账" value={`${fmtInt(stats.recharges)} 次`} /> : null}
           <StatChip label="行情标的" value={`${fmtInt(stats.symbols_with_price)} 只`} />
         </div>
       </section>

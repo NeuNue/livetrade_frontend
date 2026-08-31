@@ -10,8 +10,8 @@ export const fmtInt = (v) => nf0.format(Number(v) || 0)
 /** 通用数字（最多 2 位小数） */
 export const fmtNum = (v) => nf2.format(Number(v) || 0)
 
-/** 金额 ¥1,234.56 */
-export const fmtMoney = (v) => `¥${nf2.format(Number(v) || 0)}`
+/** 金额 $1,234.56 */
+export const fmtMoney = (v) => `$${nf2.format(Number(v) || 0)}`
 
 /** 股价 $1,234.56 */
 export const fmtPrice = (v) => `$${nf2.format(Number(v) || 0)}`
