@@ -23,6 +23,8 @@ export default function Avatar({ src, nickname = '?', size = 44, className = '' 
         height={size}
         style={{ width: size, height: size }}
         loading="lazy"
+        // B站头像 CDN 防盗链：必须不带 Referer，否则 403 → 触发 onError 兜底
+        referrerPolicy="no-referrer"
         onError={() => setBroken(true)}
       />
     )
