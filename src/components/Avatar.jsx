@@ -8,11 +8,10 @@ function hashHue(str = '') {
   return PALETTE[h % PALETTE.length]
 }
 
-/** 头像：有 face 显示图片，否则显示昵称首字符的渐变圆 */
+/** 头像：有 face 显示图片，否则显示人形图标（不再用首字母） */
 export default function Avatar({ src, nickname = '?', size = 44, className = '' }) {
   const [broken, setBroken] = useState(false)
   const color = hashHue(nickname)
-  const initials = (nickname || '?').trim().slice(0, 1)
 
   if (src && !broken) {
     return (
@@ -34,12 +33,19 @@ export default function Avatar({ src, nickname = '?', size = 44, className = '' 
       style={{
         width: size,
         height: size,
-        fontSize: size * 0.42,
         background: `linear-gradient(135deg, ${color}, #fff0f4 160%)`,
       }}
       aria-hidden="true"
     >
-      {initials}
+      <svg
+        viewBox="0 0 24 24"
+        width={size * 0.56}
+        height={size * 0.56}
+        fill="currentColor"
+        focusable="false"
+      >
+        <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2.5c-3.7 0-8 1.9-8 5V22h16v-2.5c0-3.1-4.3-5-8-5Z" />
+      </svg>
     </span>
   )
 }
