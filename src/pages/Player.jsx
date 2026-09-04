@@ -86,10 +86,7 @@ export default function Player() {
       {/* 资产收益曲线（每日，100 万为盈亏零轴，已剔除礼物充入） */}
       {lastDaily ? (
         <section className="section card">
-          <div className="section-title">
-            <h2 className="section-h2">资产收益曲线</h2>
-            <span className="section-sub">每日收盘估值 · 相对 100 万初始资金 · 不含礼物充入</span>
-          </div>
+          <h2 className="section-h2">资产收益曲线</h2>
           <div className="profile-stats equity-stats">
             <Stat label="最新总资产" value={fmtMoney(lastDaily.total)} />
             <Stat label="累计盈亏" value={fmtSigned(lastDaily.profit)} cls={`num-${pnlClass(lastDaily.profit)}`} />
