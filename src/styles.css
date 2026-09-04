@@ -1174,3 +1174,31 @@ button {
   color: var(--text-3);
   font-weight: 400;
 }
+
+/* ==========================================================================
+   错误边界降级页
+   ========================================================================== */
+.error-boundary {
+  text-align: center;
+  padding: 64px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.error-boundary-emoji {
+  font-size: 40px;
+}
+
+.error-boundary-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.error-boundary-desc {
+  font-size: 12.5px;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}

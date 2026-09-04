@@ -11,6 +11,8 @@ import { fmtMoney, fmtPct, fmtSigned } from '../format.js'
 const BASE = 1_000_000
 const H = 250
 const PAD = { top: 18, right: 18, bottom: 30, left: 62 }
+// ResizeObserver 测量前的回退宽度（首帧即可绘制，随后按实际容器宽重排）
+const FALLBACK_W = 640
 
 function yMoney(v) {
   const trim = (s) => s.replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1')
@@ -50,14 +52,15 @@ export default function EquityCurve({ daily }) {
   }, [])
 
   const geo = useMemo(() => {
-    if (n < 2 || w <= 0) return null
+    if (n < 2) return null
+    const cw = w > 0 ? w : FALLBACK_W
     const vals = daily.map((d) => d.total)
     let lo = Math.min(BASE, ...vals)
     let hi = Math.max(BASE, ...vals)
     const pad = Math.max((hi - lo) * 0.14, BASE * 0.004, 1)
     lo -= pad
     hi += pad
-    const plotW = Math.max(10, w - PAD.left - PAD.right)
+    const plotW = Math.max(10, cw - PAD.left - PAD.right)
     const plotH = H - PAD.top - PAD.bottom
     const px = (i) => PAD.left + (i / (n - 1)) * plotW
     const py = (v) => PAD.top + ((hi - v) / (hi - lo)) * plotH
@@ -92,7 +95,7 @@ export default function EquityCurve({ daily }) {
       area.push({ k: r.k, d: `M ${p0.x} ${yBase} L ${poly} L ${pn.x} ${yBase} Z` })
       line.push({ k: r.k, d: `M ${poly}` })
     }
-    return { pts, runs, area, line, yBase, lo, hi, plotW, plotH }
+    return { pts, runs, area, line, yBase, lo, hi, plotW, plotH, px, py }
   }, [daily, n, w])
 
   if (n < 2) {
@@ -102,11 +105,9 @@ export default function EquityCurve({ daily }) {
       </div>
     )
   }
-  if (!geo) {
-    // 首次渲染宽度尚未测量：先占位，ResizeObserver 就绪后立即绘制
-    return <div className="equity-curve" ref={wrapRef} style={{ minHeight: H }} />
-  }
+  if (!geo) return null // 不可达：n >= 2 时 geo 必非空（防御）
 
+  const cw = w > 0 ? w : FALLBACK_W
   const stepIdx = Math.max(1, Math.ceil(n / 6))
   const xTicks = []
   for (let i = 0; i < n; i += stepIdx) xTicks.push(i)
@@ -137,7 +138,7 @@ export default function EquityCurve({ daily }) {
       <div className="equity-chart-wrap">
         <svg
           ref={svgRef}
-          width={w}
+          width={cw}
           height={H}
           role="img"
           aria-label="每日资产收益曲线"
@@ -283,7 +284,7 @@ export default function EquityCurve({ daily }) {
         {hovered && (
           <div
             className={`curve-tip ${hovered.y < 52 ? 'curve-tip-below' : ''}`}
-            style={{ left: Math.min(Math.max(hovered.x, 92), w - 92), top: hovered.y }}
+            style={{ left: Math.min(Math.max(hovered.x, 92), cw - 92), top: hovered.y }}
           >
             <div className="curve-tip-title">{hovered.day} 收盘</div>
             <div className="curve-tip-row">
