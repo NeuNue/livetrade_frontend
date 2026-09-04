@@ -5,6 +5,7 @@ import { fmtDate, fmtInt, fmtMoney, fmtPct, fmtPrice, fmtQty, fmtSigned, shortId
 import { explainReason } from '../labels.js'
 import Avatar from '../components/Avatar.jsx'
 import TypeBadge, { pnlClass } from '../components/TypeBadge.jsx'
+import EquityCurve from '../components/EquityCurve.jsx'
 import { Empty, Loading } from '../components/State.jsx'
 
 const TRADE_PAGE = 40
@@ -40,10 +41,11 @@ export default function Player() {
     return <Empty emoji="😿" title="找不到这位玩家" desc="ta 可能还没来过自习室，或已经退场了" />
   }
 
-  const { user, rank, total, cash, positions_value, unrealized_pnl, unrealized_pnl_pct, stats, positions, trades, recharges } =
+  const { user, rank, total, cash, positions_value, unrealized_pnl, unrealized_pnl_pct, stats, positions, trades, recharges, daily = [] } =
     state.data
   const visibleTrades = trades.slice(0, tradeCount)
   const hasMoreTrades = tradeCount < trades.length
+  const lastDaily = daily.length > 0 ? daily[daily.length - 1] : null
 
   return (
     <div className="player-page">
@@ -80,6 +82,23 @@ export default function Player() {
           <Stat label="持仓标的" value={`${positions.length} 只`} />
         </div>
       </section>
+
+      {/* 资产收益曲线（每日，100 万为盈亏零轴，已剔除礼物充入） */}
+      {lastDaily ? (
+        <section className="section card">
+          <div className="section-title">
+            <h2 className="section-h2">资产收益曲线</h2>
+            <span className="section-sub">每日收盘估值 · 相对 100 万初始资金 · 不含礼物充入</span>
+          </div>
+          <div className="profile-stats equity-stats">
+            <Stat label="最新总资产" value={fmtMoney(lastDaily.total)} />
+            <Stat label="累计盈亏" value={fmtSigned(lastDaily.profit)} cls={`num-${pnlClass(lastDaily.profit)}`} />
+            <Stat label="累计收益率" value={fmtPct(lastDaily.profit_pct)} cls={`num-${pnlClass(lastDaily.profit_pct)}`} />
+            <Stat label="统计天数" value={`${daily.length} 个交易日`} />
+          </div>
+          <EquityCurve daily={daily} />
+        </section>
+      ) : null}
 
       {/* 当前持仓 */}
       <section className="section card">

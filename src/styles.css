@@ -1089,3 +1089,88 @@ button {
     margin-left: 0;
   }
 }
+
+/* ==========================================================================
+   资产收益曲线（个人页）
+   ========================================================================== */
+.equity-stats {
+  margin-top: 14px;
+}
+
+.equity-curve {
+  position: relative;
+  margin-top: 16px;
+}
+
+.equity-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.equity-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.equity-chart-wrap {
+  position: relative;
+  margin-top: 12px;
+}
+
+.equity-curve svg {
+  display: block;
+  max-width: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+.equity-note {
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+  padding: 18px 0 6px;
+}
+
+.curve-tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 12px));
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  z-index: 5;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.curve-tip-below {
+  transform: translate(-50%, 16px);
+}
+
+.curve-tip-title {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.curve-tip-pct {
+  color: var(--text-3);
+  font-weight: 400;
+}
